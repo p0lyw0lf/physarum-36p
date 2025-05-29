@@ -1,4 +1,4 @@
-Quite minimal non-interactive version of [Interactive physarum](https:://github.com/Bleuje/interactive-physarum) project.
+Quite minimal non-interactive version of [Interactive physarum](https://github.com/Bleuje/interactive-physarum) project.
 
 So it's some kind of simplified openFrameworks implementation of [36 Points](www.sagejenson.com/36points/).
 
