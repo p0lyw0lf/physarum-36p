@@ -2,6 +2,8 @@ Quite minimal non-interactive version of [Interactive physarum](https:://github.
 
 So it's some kind of simplified openFrameworks implementation of [36 Points](www.sagejenson.com/36points/).
 
+Use arrow keys to switch between points.
+
 ### License:
 License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License
 
