@@ -1,10 +1,11 @@
-Quite minimal non-interactive version of [Interactive physarum](https://github.com/Bleuje/interactive-physarum) project.
+Some kind of simplified openFrameworks implementation of [36 Points](www.sagejenson.com/36points/).
 
-So it's some kind of simplified openFrameworks implementation of [36 Points](www.sagejenson.com/36points/).
+(Quite minimal non-interactive version of [Interactive physarum](https://github.com/Bleuje/interactive-physarum) project.)
 
 Use arrow keys to switch between points.
 
-### License:
+________
+
 License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License
 
 Attribution:
