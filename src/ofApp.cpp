@@ -95,7 +95,7 @@ void ofApp::update()
     setterShader.setUniform1i("width", trailReadBuffer.getWidth());
     setterShader.setUniform1i("height", trailReadBuffer.getHeight());
     setterShader.setUniform1i("value", 0);
-    setterShader.dispatchCompute(SimulationSettings::WIDTH / 32, SimulationSettings::HEIGHT / 32, 1);
+    setterShader.dispatchCompute(SimulationSettings::WIDTH / SimulationSettings::WORK_GROUP_SIZE, SimulationSettings::HEIGHT / SimulationSettings::WORK_GROUP_SIZE, 1);
     setterShader.end();
 
     trailReadBuffer.getTexture().bindAsImage(0, GL_READ_ONLY);
@@ -106,14 +106,14 @@ void ofApp::update()
     moveShader.setUniform1i("height", trailReadBuffer.getHeight());
     moveShader.setUniform1f("pixelScaleFactor", SimulationSettings::PIXEL_SCALE_FACTOR);
 
-    moveShader.dispatchCompute(particles.size() / (128 * SimulationSettings::PARTICLE_PARAMETERS_COUNT), 1, 1);
+    moveShader.dispatchCompute(particles.size() / (SimulationSettings::PARTICLE_WORK_GROUPS * SimulationSettings::PARTICLE_PARAMETERS_COUNT), 1, 1);
     moveShader.end();
 
     depositShader.begin();
     depositShader.setUniform1i("width", trailReadBuffer.getWidth());
     depositShader.setUniform1i("height", trailReadBuffer.getHeight());
     depositShader.setUniform1f("depositFactor", SimulationSettings::DEPOSIT_FACTOR);
-    depositShader.dispatchCompute(SimulationSettings::WIDTH / 32, SimulationSettings::HEIGHT / 32, 1);
+    depositShader.dispatchCompute(SimulationSettings::WIDTH / SimulationSettings::WORK_GROUP_SIZE, SimulationSettings::HEIGHT / SimulationSettings::WORK_GROUP_SIZE, 1);
     depositShader.end();
 
     trailReadBuffer.getTexture().bindAsImage(1, GL_WRITE_ONLY);
@@ -123,7 +123,7 @@ void ofApp::update()
     diffusionShader.setUniform1i("width", trailReadBuffer.getWidth());
     diffusionShader.setUniform1i("height", trailReadBuffer.getHeight());
     diffusionShader.setUniform1f("decayFactor", SimulationSettings::DECAY_FACTOR);
-    diffusionShader.dispatchCompute(trailReadBuffer.getWidth() / 32, trailReadBuffer.getHeight() / 32, 1);
+    diffusionShader.dispatchCompute(trailReadBuffer.getWidth() / SimulationSettings::WORK_GROUP_SIZE, trailReadBuffer.getHeight() / SimulationSettings::WORK_GROUP_SIZE, 1);
     diffusionShader.end();
 
     std::stringstream strm;
