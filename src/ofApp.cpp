@@ -104,7 +104,6 @@ void ofApp::update()
     moveShader.begin();
     moveShader.setUniform1i("width", trailReadBuffer.getWidth());
     moveShader.setUniform1i("height", trailReadBuffer.getHeight());
-    moveShader.setUniform1f("pixelScaleFactor", SimulationSettings::PIXEL_SCALE_FACTOR);
 
     moveShader.dispatchCompute(particles.size() / (SimulationSettings::PARTICLE_WORK_GROUPS * SimulationSettings::PARTICLE_PARAMETERS_COUNT), 1, 1);
     moveShader.end();

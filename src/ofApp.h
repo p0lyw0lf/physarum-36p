@@ -11,7 +11,6 @@ namespace SimulationSettings
     constexpr int PARTICLE_PARAMETERS_COUNT = 4;
     constexpr float DECAY_FACTOR = 0.75f;
     constexpr float DEPOSIT_FACTOR = 0.003f;
-    constexpr float PIXEL_SCALE_FACTOR = 250.0f;
     constexpr int FRAME_RATE = 60;
     constexpr int NUMBER_OF_COLOR_MODES = 10;
     constexpr int WORK_GROUP_SIZE = 32;

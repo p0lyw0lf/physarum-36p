@@ -7,7 +7,6 @@
 
 uniform int width;
 uniform int height;
-uniform float pixelScaleFactor;
 
 struct PointSettings {
     float defaultScalingFactor;
@@ -118,8 +117,8 @@ void main() {
     // For a current sensed value S,
     // physarum param = A + B * (S ^ C)
     // These A,B,C parameters are part of the data of a "Point"
-    float sensorDistance = params.SensorDistance0 + params.SD_amplitude * pow(currentSensedValue, params.SD_exponent) * pixelScaleFactor;
-    float moveDistance = params.MoveDistance0 + params.MD_amplitude * pow(currentSensedValue, params.MD_exponent) * pixelScaleFactor;
+    float sensorDistance = params.SensorDistance0 + params.SD_amplitude * pow(currentSensedValue, params.SD_exponent) * 250.0;
+    float moveDistance = params.MoveDistance0 + params.MD_amplitude * pow(currentSensedValue, params.MD_exponent) * 250.0;
     float sensorAngle = params.SensorAngle0 + params.SA_amplitude * pow(currentSensedValue, params.SA_exponent);
     float rotationAngle = params.RotationAngle0 + params.RA_amplitude * pow(currentSensedValue, params.RA_exponent);
     // 3 * 4 = 12 parameters + 2 with sensor bias
