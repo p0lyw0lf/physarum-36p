@@ -13,5 +13,5 @@ layout(std430,binding=3) buffer mutex
 
 layout(local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
 void main() {
-    particlesCounter[uint(gl_GlobalInvocationID.x * height + gl_GlobalInvocationID.y)] = value;
+	particlesCounter[uint(gl_GlobalInvocationID.x * height + gl_GlobalInvocationID.y)] = value;
 }
