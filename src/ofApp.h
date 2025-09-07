@@ -2,8 +2,15 @@
 
 #include "ofMain.h"
 #include "points_basematrix.h"
+#include <atomic>
+#include <cstdint>
 
 namespace SimulationSettings {
+constexpr int SIDEBAR_WIDTH = 200;
+// TODO: see if I can change WIDTH/HEIGHT/NUMBER_OF_PARTICLES to exactly match
+// resolution currently seems like no, I should just leave them as-is because
+// they're already pretty finely-tuned for the exact parameters & look nice
+// enough anyways
 constexpr int WIDTH = 1280;
 constexpr int HEIGHT = 736;
 constexpr size_t NUMBER_OF_PARTICLES = 512 * 512 * 22;
@@ -61,6 +68,11 @@ public:
   };
   std::vector<uint16_t> particles;
   ofBufferObject particlesBuffer;
+
+  // Boolean, either stores 1 or 0. Accessed from all threads.
+  std::atomic<uint8_t> playing;
+  // Accessed only from the ::update thread.
+  bool last_playing;
 
   void keyPressed(int key);
 };

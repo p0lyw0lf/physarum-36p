@@ -151,11 +151,38 @@ void ofApp::update() {
 }
 
 void ofApp::draw() {
+  // Draw main simulation
   ofPushMatrix();
-  ofScale(1.0 * ofGetWidth() / fboDisplay.getWidth(),
-          1.0 * ofGetHeight() / fboDisplay.getHeight());
-  fboDisplay.draw(0, 0);
+  float xscale = 1.0 * (ofGetWidth() - SimulationSettings::SIDEBAR_WIDTH) /
+                 fboDisplay.getWidth();
+  ofScale(xscale, 1.0 * ofGetHeight() / fboDisplay.getHeight());
+  fboDisplay.draw(SimulationSettings::SIDEBAR_WIDTH / xscale, 0);
   ofPopMatrix();
+
+  // Draw sidebar
+  ofPushStyle();
+  ofFill();
+  ofSetColor(0, 0, 0);
+  ofSetLineWidth(0);
+  ofDrawRectangle(0, 0, SimulationSettings::SIDEBAR_WIDTH, ofGetHeight());
+  ofPopStyle();
+
+  // Draw play/pause button on top of sidebar
+  ofPushStyle();
+  ofFill();
+  ofSetColor(255, 255, 255);
+  ofSetLineWidth(0);
+  float midpoint = SimulationSettings::SIDEBAR_WIDTH / 2.0;
+  if (playing) {
+    ofDrawTriangle(40, 40, 40, SimulationSettings::SIDEBAR_WIDTH - 40,
+                   SimulationSettings::SIDEBAR_WIDTH - 40, midpoint);
+  } else {
+    ofDrawRectangle(40, 40, midpoint - 50,
+                    SimulationSettings::SIDEBAR_WIDTH - 80);
+    ofDrawRectangle(midpoint + 10, 40, midpoint - 50,
+                    SimulationSettings::SIDEBAR_WIDTH - 80);
+  }
+  ofPopStyle();
 }
 
 void ofApp::keyPressed(int key) {
@@ -171,6 +198,9 @@ void ofApp::keyPressed(int key) {
     break;
   case OF_KEY_DOWN:
     pointCursorIndex = (pointCursorIndex - 1 + numberOfPoints) % numberOfPoints;
+    break;
+  case OF_KEY_SPACE:
+    playing ^= 1;
     break;
   }
 
