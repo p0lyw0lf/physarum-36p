@@ -1,4 +1,5 @@
 #include "ofApp.h"
+#include "ofSoundPlayer.h"
 
 void ofApp::setup() {
   ofSetFrameRate(SimulationSettings::FRAME_RATE);
@@ -66,6 +67,8 @@ void ofApp::setup() {
   fboDisplay.getTexture().bindAsImage(4, GL_WRITE_ONLY);
 
   loadParameters();
+
+  music.load("project.mp3");
 }
 
 void ofApp::loadParameters() {
@@ -99,6 +102,25 @@ void ofApp::loadParameters() {
 }
 
 void ofApp::update() {
+  ofSoundUpdate();
+
+  bool currentlyPlaying = playing.load();
+  if (currentlyPlaying) {
+    shaderUpdate();
+
+    if (!lastPlaying) {
+      music.setPositionMS(lastPositionMS);
+      music.play();
+    }
+  } else if (lastPlaying) {
+    lastPositionMS = music.getPositionMS();
+    music.stop();
+  }
+
+  lastPlaying = currentlyPlaying;
+}
+
+void ofApp::shaderUpdate() {
   loadParameters();
 
   setterShader.begin();

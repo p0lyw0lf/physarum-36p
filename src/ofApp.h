@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
+#include "ofSoundPlayer.h"
 #include "points_basematrix.h"
 #include <atomic>
 #include <cstdint>
@@ -42,11 +43,15 @@ struct PointSettings {
 };
 
 class ofApp : public ofBaseApp {
-
 public:
   void setup();
   void update();
   void draw();
+
+  void keyPressed(int key);
+
+private:
+  void shaderUpdate();
 
   std::vector<int> selectedPoints = {
       0,  5,  2,  15, 3,  4,  6,  1,  7,  8, 9, 10,
@@ -72,7 +77,8 @@ public:
   // Boolean, either stores 1 or 0. Accessed from all threads.
   std::atomic<uint8_t> playing;
   // Accessed only from the ::update thread.
-  bool last_playing;
+  bool lastPlaying = false;
+  int lastPositionMS = 0;
 
-  void keyPressed(int key);
+  ofSoundPlayer music;
 };
