@@ -1,5 +1,7 @@
 #pragma once
 
+#include "increments.h"
+#include "ofEvents.h"
 #include "ofMain.h"
 #include "ofSoundPlayer.h"
 #include "points_basematrix.h"
@@ -7,7 +9,8 @@
 #include <cstdint>
 
 namespace SimulationSettings {
-constexpr int SIDEBAR_WIDTH = 200;
+constexpr int SIDEBAR_WIDTH = 70;
+constexpr int HEADER_HEIGHT = 70;
 // TODO: see if I can change WIDTH/HEIGHT/NUMBER_OF_PARTICLES to exactly match
 // resolution currently seems like no, I should just leave them as-is because
 // they're already pretty finely-tuned for the exact parameters & look nice
@@ -24,22 +27,22 @@ constexpr int WORK_GROUP_SIZE = 32;
 constexpr int PARTICLE_WORK_GROUPS = 128;
 }; // namespace SimulationSettings
 
-struct PointSettings {
-  float defaultScalingFactor;
-  float SensorDistance0;
-  float SD_exponent;
-  float SD_amplitude;
-  float SensorAngle0;
-  float SA_exponent;
-  float SA_amplitude;
-  float RotationAngle0;
-  float RA_exponent;
-  float RA_amplitude;
-  float MoveDistance0;
-  float MD_exponent;
-  float MD_amplitude;
-  float SensorBias1;
-  float SensorBias2;
+template <typename T> struct PointSettings {
+  T defaultScalingFactor = 0;
+  T SensorDistance0 = 0;
+  T SD_exponent = 0;
+  T SD_amplitude = 0;
+  T SensorAngle0 = 0;
+  T SA_exponent = 0;
+  T SA_amplitude = 0;
+  T RotationAngle0 = 0;
+  T RA_exponent = 0;
+  T RA_amplitude = 0;
+  T MoveDistance0 = 0;
+  T MD_exponent = 0;
+  T MD_amplitude = 0;
+  T SensorBias1 = 0;
+  T SensorBias2 = 0;
 };
 
 class ofApp : public ofBaseApp {
@@ -48,7 +51,7 @@ public:
   void update();
   void draw();
 
-  void keyPressed(int key);
+  void keyPressed(ofKeyEventArgs &key);
 
 private:
   void shaderUpdate();
@@ -58,16 +61,40 @@ private:
       11, 12, 14, 16, 13, 17, 18, 19, 20, 21}; // list of chosen points from the
                                                // matrix
   int numberOfPoints = selectedPoints.size();
-  int pointCursorIndex = 0;
+  int pointCursorIndex = 0; // indexes into selectedPoints
+  std::vector<PointSettings<float>> simulationParameters;
+  ofBufferObject simulationParametersBuffer;
+
+  // The offset from the current base point when we load a setting
+  PointSettings<float> offset;
+  // When changing each setting, how much to change it by.
+  // These values index into the INCREMENTS array
+  PointSettings<int> increment;
+  // Loads the parameters from a changed pointCursorIndex, resetting offset and
+  // increment when it does so.
   void loadParameters();
+  // Loads the paramenters into the simulationParametersBuffer given just a
+  // changed offset array.
+  void updateParameters();
+
+  // Given a field to modify, check if that key is pressed and perform the
+  // resulting modification accordingly.
+  // keys[0] == increment up
+  // keys[1] == increment down
+  // keys[2] == toggle increment
+  void checkIncrementKey(int codepoint, float PointSettings<float>::*offset_m,
+                         int PointSettings<int>::*increment_m,
+                         const int (&keys)[3]);
+
+  // Displays the value of a given setting using ofDrawBitmapText
+  void drawSetting(const char *name, float PointSettings<float>::*offset_m,
+                   int PointSettings<int>::*increment_m, float x, float y);
 
   ofFbo trailReadBuffer, trailWriteBuffer, fboDisplay;
   ofShader setterShader, moveShader, depositShader, diffusionShader;
 
   std::vector<uint32_t> counter;
   ofBufferObject counterBuffer;
-  std::vector<PointSettings> simulationParameters;
-  ofBufferObject simulationParametersBuffer;
   struct Particle {
     glm::vec4 data;
   };
@@ -76,8 +103,9 @@ private:
 
   // Boolean, either stores 1 or 0. Accessed from all threads.
   std::atomic<uint8_t> playing;
+  std::atomic<uint8_t> musicPlaying;
   // Accessed only from the ::update thread.
-  bool lastPlaying = false;
+  bool lastMusicPlaying = false;
   int lastPositionMS = 0;
 
   ofSoundPlayer music;
