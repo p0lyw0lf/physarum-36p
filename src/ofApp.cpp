@@ -1,8 +1,7 @@
 #include "ofApp.h"
 #include "increments.h"
-#include "ofEvents.h"
-#include "ofGraphics.h"
-#include "ofSoundPlayer.h"
+#include <iomanip>
+#include <ios>
 #include <sstream>
 
 void ofApp::setup() {
@@ -189,21 +188,17 @@ void ofApp::shaderUpdate() {
 void ofApp::draw() {
   // Draw main simulation
   ofPushMatrix();
-  float xscale = 1.0 * (ofGetWidth() - SimulationSettings::SIDEBAR_WIDTH) /
-                 fboDisplay.getWidth();
+  float xscale = 1.0 * ofGetWidth() / fboDisplay.getWidth();
   float yscale = 1.0 * (ofGetHeight() - SimulationSettings::HEADER_HEIGHT) /
                  fboDisplay.getHeight();
   ofScale(xscale, yscale);
-  fboDisplay.draw(SimulationSettings::SIDEBAR_WIDTH / xscale,
-                  SimulationSettings::HEADER_HEIGHT / yscale);
+  fboDisplay.draw(0, SimulationSettings::HEADER_HEIGHT / yscale);
   ofPopMatrix();
 
   ofPushStyle();
   ofFill();
   ofSetColor(0, 0, 0);
   ofSetLineWidth(0);
-  // Draw sidebar
-  ofDrawRectangle(0, 0, SimulationSettings::SIDEBAR_WIDTH, ofGetHeight());
   // Draw header
   ofDrawRectangle(0, 0, ofGetWidth(), SimulationSettings::HEADER_HEIGHT);
   ofPopStyle();
@@ -212,16 +207,24 @@ void ofApp::draw() {
   ofFill();
   ofSetColor(255, 255, 255);
   ofSetLineWidth(0);
-  // Draw play/pause button on top of sidebar
-  float midpoint = SimulationSettings::SIDEBAR_WIDTH / 2.0;
+  // Draw play/pause button on top of sidebar.
+  // Occupies a square HEADER_HEIGHT in both dimensions, w/ padding so it
+  // doesn't touch the edges.
+  float midpoint = SimulationSettings::HEADER_HEIGHT / 2.0;
   if (playing && musicPlaying) {
-    ofDrawTriangle(20, 20, 20, SimulationSettings::SIDEBAR_WIDTH - 20,
-                   SimulationSettings::SIDEBAR_WIDTH - 20, midpoint);
+    ofDrawTriangle(20, 20, 20, SimulationSettings::HEADER_HEIGHT - 20,
+                   SimulationSettings::HEADER_HEIGHT - 20, midpoint);
   } else {
-    ofDrawRectangle(20, 20, midpoint - 30,
-                    SimulationSettings::SIDEBAR_WIDTH - 40);
-    ofDrawRectangle(midpoint + 10, 20, midpoint - 30,
-                    SimulationSettings::SIDEBAR_WIDTH - 40);
+    /**
+     * 20 + width + space + width + 20 = HEADER_HEIGHT
+     * 2 * width = HEADER_HEIGHT - 40 - space
+     * width = HEADER_HEIGHT / 2 - 20 - space / 2
+     * choose space = 10
+     */
+    ofDrawRectangle(20, 20, midpoint - 25,
+                    SimulationSettings::HEADER_HEIGHT - 40);
+    ofDrawRectangle(midpoint + 5, 20, midpoint - 25,
+                    SimulationSettings::HEADER_HEIGHT - 40);
   }
 
   // Display values for each parameter
@@ -229,18 +232,21 @@ void ofApp::draw() {
   drawSetting(name, &PointSettings<float>::field, &PointSettings<int>::field,  \
               x, y);
 
-  int text_start = SimulationSettings::SIDEBAR_WIDTH;
+  int text_start = SimulationSettings::HEADER_HEIGHT;
 #define DRAW3(name0, field0, name1, field1, name2, field2)                     \
-  DRAW(name0, field0, text_start, 10);                                         \
-  DRAW(name1, field1, text_start, 30);                                         \
-  DRAW(name2, field2, text_start, 50);                                         \
-  text_start += 140;
+  DRAW(name0, field0, text_start, 18);                                         \
+  DRAW(name1, field1, text_start, 38);                                         \
+  DRAW(name2, field2, text_start, 58);                                         \
+  text_start += 160;
 
   DRAW3("SD0", SensorDistance0, "SDA", SD_amplitude, "SDE", SD_exponent);
   DRAW3("SA0", SensorAngle0, "SAA", SA_amplitude, "SAE", SA_exponent);
   DRAW3("RA0", RotationAngle0, "RAA", RA_amplitude, "RAE", RA_exponent);
   DRAW3("MD0", MoveDistance0, "MDA", MD_amplitude, "MDE", MD_exponent);
   DRAW3("SB1", SensorBias1, "SB2", SensorBias2, "SF", defaultScalingFactor);
+
+#undef DRAW3
+#undef DRAW
 
   ofPopStyle();
 }
@@ -249,8 +255,13 @@ void ofApp::drawSetting(const char *name, float PointSettings<float>::*offset_m,
                         int PointSettings<int>::*increment_m, float x,
                         float y) {
   stringstream buf;
-  buf << name << ": " << simulationParameters[0].*offset_m << "("
-      << INCREMENTS[increment.*increment_m] << ")";
+  buf << name << ": ";
+  // I HATE C++ (pre-20 when they added std::format, but OF is too old lmaooo)
+  stringstream value;
+  value << std::fixed << std::setw(6) << std::setprecision(3)
+        << simulationParameters[0].*offset_m;
+  buf << value.str() << "(" << INCREMENTS[increment.*increment_m] << ")";
+
   ofDrawBitmapString(buf.str(), x, y);
 }
 
@@ -292,6 +303,8 @@ void ofApp::keyPressed(ofKeyEventArgs &key) {
   CHECK('R', 'F', 'V', SensorBias1);
   CHECK('T', 'G', 'B', SensorBias2);
   CHECK('Y', 'H', 'N', defaultScalingFactor);
+
+#undef CHECK
 
   if (key.codepoint == 'M') {
     musicPlaying ^= 1;

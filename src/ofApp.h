@@ -1,15 +1,11 @@
 #pragma once
 
-#include "increments.h"
-#include "ofEvents.h"
 #include "ofMain.h"
-#include "ofSoundPlayer.h"
 #include "points_basematrix.h"
 #include <atomic>
 #include <cstdint>
 
 namespace SimulationSettings {
-constexpr int SIDEBAR_WIDTH = 70;
 constexpr int HEADER_HEIGHT = 70;
 // TODO: see if I can change WIDTH/HEIGHT/NUMBER_OF_PARTICLES to exactly match
 // resolution currently seems like no, I should just leave them as-is because
