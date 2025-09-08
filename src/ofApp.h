@@ -58,17 +58,24 @@ private:
                                                // matrix
   int numberOfPoints = selectedPoints.size();
   int pointCursorIndex = 0; // indexes into selectedPoints
-  std::vector<PointSettings<float>> simulationParameters;
-  ofBufferObject simulationParametersBuffer;
 
+  // The base point of the simulation settings.
+  PointSettings<float> base;
   // The offset from the current base point when we load a setting
   PointSettings<float> offset;
   // When changing each setting, how much to change it by.
   // These values index into the INCREMENTS array
   PointSettings<int> increment;
+
+  // Resident memory for simulationParametersBuffer to attach itself to
+  std::vector<PointSettings<float>> simulationParameters;
+  ofBufferObject simulationParametersBuffer;
+
   // Loads the parameters from a changed pointCursorIndex, resetting offset and
   // increment when it does so.
   void loadParameters();
+  // Loads a random set of parameters
+  void loadRandomParameters();
   // Loads the paramenters into the simulationParametersBuffer given just a
   // changed offset array.
   void updateParameters();

@@ -1,5 +1,6 @@
 #include "ofApp.h"
 #include "increments.h"
+#include <cmath>
 #include <iomanip>
 #include <ios>
 #include <sstream>
@@ -78,34 +79,92 @@ void ofApp::loadParameters() {
   offset = PointSettings<float>{0};
   increment = PointSettings<int>{0};
 
-  updateParameters();
-}
-
-void ofApp::updateParameters() {
   int matrixRow = selectedPoints[pointCursorIndex];
 
   auto getParam = [&](int column) {
     return ParametersMatrix[matrixRow][column];
   };
 
+  base.defaultScalingFactor = getParam(PARAMS_DIMENSION - 1);
+  base.SensorDistance0 = getParam(0);
+  base.SD_exponent = getParam(1);
+  base.SD_amplitude = getParam(2);
+  base.SensorAngle0 = getParam(3);
+  base.SA_exponent = getParam(4);
+  base.SA_amplitude = getParam(5);
+  base.RotationAngle0 = getParam(6);
+  base.RA_exponent = getParam(7);
+  base.RA_amplitude = getParam(8);
+  base.MoveDistance0 = getParam(9);
+  base.MD_exponent = getParam(10);
+  base.MD_amplitude = getParam(11);
+  base.SensorBias1 = getParam(12);
+  base.SensorBias2 = getParam(13);
+
+  updateParameters();
+}
+
+static float sampleRandomSetting() {
+  float decision = ofRandom(0, 1);
+  if (decision < 0.3) {
+    return 0;
+  } else if (decision < 0.93) {
+    // exponential distribution with λ = 1
+    // CDF = λe^-λx => inverse CDF = -log(c/λ)/λ
+    // sample a value in range (0, 1], so we don't have to worry about log(0)
+    constexpr float lambda = 1;
+    float cdf = -ofRandom(-1, 0);
+    return -std::log(cdf / lambda) / lambda;
+  } else {
+    // exponential distrubiton with λ = 2, for the negative numbers
+    constexpr float lambda = 2;
+    float cdf = -ofRandom(-1, 0);
+    return std::log(cdf / lambda) / lambda;
+  }
+}
+
+void ofApp::loadRandomParameters() {
+  offset = PointSettings<float>{0};
+  increment = PointSettings<int>{0};
+
+  base.defaultScalingFactor = sampleRandomSetting();
+  base.SensorDistance0 = sampleRandomSetting();
+  base.SD_exponent = sampleRandomSetting();
+  base.SD_amplitude = sampleRandomSetting();
+  base.SensorAngle0 = sampleRandomSetting();
+  base.SA_exponent = sampleRandomSetting();
+  base.SA_amplitude = sampleRandomSetting();
+  base.RotationAngle0 = sampleRandomSetting();
+  base.RA_exponent = sampleRandomSetting();
+  base.RA_amplitude = sampleRandomSetting();
+  base.MoveDistance0 = sampleRandomSetting();
+  base.MD_exponent = sampleRandomSetting();
+  base.MD_amplitude = sampleRandomSetting();
+  base.SensorBias1 = sampleRandomSetting();
+  base.SensorBias2 = sampleRandomSetting();
+
+  updateParameters();
+}
+
+void ofApp::updateParameters() {
   PointSettings<float> loadedParams;
 
   loadedParams.defaultScalingFactor =
-      getParam(PARAMS_DIMENSION - 1) + offset.defaultScalingFactor;
-  loadedParams.SensorDistance0 = getParam(0) + offset.SensorDistance0;
-  loadedParams.SD_exponent = getParam(1) + offset.SD_exponent;
-  loadedParams.SD_amplitude = getParam(2) + offset.SD_amplitude;
-  loadedParams.SensorAngle0 = getParam(3) + offset.SensorAngle0;
-  loadedParams.SA_exponent = getParam(4) + offset.SA_exponent;
-  loadedParams.SA_amplitude = getParam(5) + offset.SA_amplitude;
-  loadedParams.RotationAngle0 = getParam(6) + offset.RotationAngle0;
-  loadedParams.RA_exponent = getParam(7) + offset.RA_exponent;
-  loadedParams.RA_amplitude = getParam(8) + offset.RA_amplitude;
-  loadedParams.MoveDistance0 = getParam(9) + offset.MoveDistance0;
-  loadedParams.MD_exponent = getParam(10) + offset.MD_exponent;
-  loadedParams.MD_amplitude = getParam(11) + offset.MD_amplitude;
-  loadedParams.SensorBias1 = getParam(12) + offset.SensorBias1;
-  loadedParams.SensorBias2 = getParam(13) + offset.SensorBias2;
+      base.defaultScalingFactor + offset.defaultScalingFactor;
+  loadedParams.SensorDistance0 = base.SensorDistance0 + offset.SensorDistance0;
+  loadedParams.SD_exponent = base.SD_exponent + offset.SD_exponent;
+  loadedParams.SD_amplitude = base.SD_amplitude + offset.SD_amplitude;
+  loadedParams.SensorAngle0 = base.SensorAngle0 + offset.SensorAngle0;
+  loadedParams.SA_exponent = base.SA_exponent + offset.SA_exponent;
+  loadedParams.SA_amplitude = base.SA_amplitude + offset.SA_amplitude;
+  loadedParams.RotationAngle0 = base.RotationAngle0 + offset.RotationAngle0;
+  loadedParams.RA_exponent = base.RA_exponent + offset.RA_exponent;
+  loadedParams.RA_amplitude = base.RA_amplitude + offset.RA_amplitude;
+  loadedParams.MoveDistance0 = base.MoveDistance0 + offset.MoveDistance0;
+  loadedParams.MD_exponent = base.MD_exponent + offset.MD_exponent;
+  loadedParams.MD_amplitude = base.MD_amplitude + offset.MD_amplitude;
+  loadedParams.SensorBias1 = base.SensorBias1 + offset.SensorBias1;
+  loadedParams.SensorBias2 = base.SensorBias2 + offset.SensorBias2;
 
   simulationParameters[0] = loadedParams;
 
@@ -307,7 +366,15 @@ void ofApp::keyPressed(ofKeyEventArgs &key) {
 #undef CHECK
 
   if (key.codepoint == 'M') {
+    // toggle music mute
     musicPlaying ^= 1;
+  } else if (key.codepoint == '`') {
+    // reset offsets
+    offset = PointSettings<float>{0};
+  } else if (key.codepoint == '?') {
+    // randomize base point, sampling each value from a special distribution
+    loadRandomParameters();
+    goto no_load;
   }
 
   updateParameters();
@@ -315,6 +382,8 @@ void ofApp::keyPressed(ofKeyEventArgs &key) {
 
 full_load:
   loadParameters();
+no_load:
+  return;
 }
 
 void ofApp::checkIncrementKey(int codepoint,
